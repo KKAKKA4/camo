@@ -2,6 +2,7 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.camera import Camera
+import time
 
 def export_to_png(self, filename, *args):
     '''Saves an image of the widget and its children in png format at the
@@ -47,15 +48,16 @@ class MirrorCamera(Camera):
         self.texture = self._camera.texture
         self.texture_size = list(self.texture.size)
         self.texture.flip_vertical()
-
+   
 class CameraWidget(BoxLayout):
-    def TakePicture(self, *args):
-        self.export_to_png = export_to_png
-        self.export_to_png(self.ids.camera, filename='test2.png')
-
+    pass
 
 class Demo(ScreenManager):
-	pass
+    def capture(self):
+        camera = self.ids['camera']
+        timestr = time.strftime("%Y%m%d_%H%M%S")
+        print(camera.export_to_png("IMG_{}.png".format(timestr)))
+        print("Captured")
 
 class DemoApp(App):
 

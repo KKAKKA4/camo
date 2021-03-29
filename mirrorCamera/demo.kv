@@ -10,11 +10,7 @@
             xy: (-self.x - self.width / 2, -self.y - self.height / 2)
     canvas.after:
         PopMatrix
-    Button:
-        text: 'Capture'
-        size_hint_y: None
-        height: '48dp'
-        on_press: root.capture()
+
 <Demo>:
 	Screen:
 		name: 'screen1'
@@ -26,3 +22,33 @@
 				index: 0
 				resolution: (640, 480)
 				play: True
+            Button:
+                text: "Capture"
+                on_press: root.capture()
+			GridLayout:
+				cols: 3
+                Button:
+					text: "Capture"
+					on_press: camera1.TakePicture()
+				Button:
+					text: "To screen 2"
+					on_press: root.current = 'screen2'
+				ToggleButton:
+					text: "Turn camera on"
+					on_press: camera1.play = not camera1.play; self.text = "Stop recording" if camera1.play else "Start recording"
+	Screen:
+		name: 'screen2'
+		CameraWidget:
+			orientation: 'vertical'
+			MirrorCamera:
+				id: camera2
+				index: 0
+				resolution: (640, 480)
+				play: False
+			BoxLayout:
+				Button:
+					text: "To screen 1"
+					on_press: root.current = 'screen1'
+				ToggleButton:
+					text: "Turn camera on"
+					on_press: camera2.play = not camera2.play; self.text = "Stop recording" if camera2.play else "Start recording"					
