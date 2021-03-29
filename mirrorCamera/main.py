@@ -2,6 +2,9 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.camera import Camera
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.image import Image
+import glob
 import time
 
 def export_to_png(self, filename, *args):
@@ -52,12 +55,34 @@ class MirrorCamera(Camera):
 class CameraWidget(BoxLayout):
     pass
 
+class Image_Gallery(GridLayout):
+    def __init__(self, **kwargs):
+        super(Image_Gallery, self).__init__(**kwargs)
+        images = glob.glob('./*.png') 
+        self.cols = 3
+        for img in images:
+            print(1, img)
+            thumb = MyImage(source=img)
+            self.add_widget(thumb)
+           
+
+class MyImage(Image):
+    def on_touch_down(self, touch):
+        if self.collide_point(*touch.pos):
+            print(self.source)
+
+
 class Demo(ScreenManager):
     def capture(self):
-        camera = self.ids['camera']
+        camera = self.ids['camera1']
         timestr = time.strftime("%Y%m%d_%H%M%S")
-        print(camera.export_to_png("IMG_{}.png".format(timestr)))
+        camera.export_to_png("IMG_{}.png".format(timestr))
         print("Captured")
+
+    def refresh(self):
+        gallery = self.ids['gallery']
+        gallery.__init__(gallery)
+
 
 class DemoApp(App):
 

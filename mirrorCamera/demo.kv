@@ -22,33 +22,24 @@
 				index: 0
 				resolution: (640, 480)
 				play: True
-            Button:
-                text: "Capture"
-                on_press: root.capture()
 			GridLayout:
-				cols: 3
+				cols: 2
+				height: '48dp'
                 Button:
 					text: "Capture"
-					on_press: camera1.TakePicture()
+					on_press: root.capture()
 				Button:
-					text: "To screen 2"
+					text: "To album"
 					on_press: root.current = 'screen2'
-				ToggleButton:
-					text: "Turn camera on"
-					on_press: camera1.play = not camera1.play; self.text = "Stop recording" if camera1.play else "Start recording"
 	Screen:
 		name: 'screen2'
-		CameraWidget:
-			orientation: 'vertical'
-			MirrorCamera:
-				id: camera2
-				index: 0
-				resolution: (640, 480)
-				play: False
-			BoxLayout:
-				Button:
-					text: "To screen 1"
-					on_press: root.current = 'screen1'
-				ToggleButton:
-					text: "Turn camera on"
-					on_press: camera2.play = not camera2.play; self.text = "Stop recording" if camera2.play else "Start recording"					
+		Image_Gallery:
+			id: gallery
+		GridLayout:
+			cols: 2
+			Button:
+				text: "Refresh"
+				on_press: root.refresh()
+			Button:
+				text: "To camera"
+				on_press: root.current = 'screen1'
