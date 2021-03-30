@@ -37,6 +37,20 @@
 			id: gallery
 		GridLayout:
 			cols: 2
+			cols
+			Button:
+				text: "Refresh"
+				on_press: root.refresh()
+			Button:
+				text: "To camera"
+				on_press: root.current = 'screen1'
+	
+	Screen:
+		name: 'screen3'
+		Image_Gallery:
+			id: gallery
+		GridLayout:
+			cols: 2
 			Button:
 				text: "Refresh"
 				on_press: root.refresh()
