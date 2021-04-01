@@ -1,14 +1,23 @@
+import sys
+import os
+import time
+import datetime
+import cv2
+import numpy as np
+from PIL import Image
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.camera import Camera
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.image import Image
-import glob
-import time
+from kivy.graphics.texture import Texture
+
+ROOT_DIR = os.path.abspath("")
+sys.path.append(ROOT_DIR)
+from Mask_RCNN.demo import ImageProcess
+
 
 def export_to_png(self, filename, *args):
-    '''Saves an image of the widget and its children in png format at the
+    """Saves an image of the widget and its children in png format at the
     specified filename. Works by removing the widget canvas from its
     parent, rendering to an :class:`~kivy.graphics.fbo.Fbo`, and calling
     :meth:`~kivy.graphics.texture.Texture.save`.
@@ -22,7 +31,7 @@ def export_to_png(self, filename, *args):
         The image will be saved in png format, you should include the
         extension in your filename.
     .. versionadded:: 1.8.1
-    '''
+    """
 
     if self.parent is not None:
         canvas_parent_index = self.parent.canvas.indexof(self.canvas)
@@ -51,42 +60,71 @@ class MirrorCamera(Camera):
         self.texture = self._camera.texture
         self.texture_size = list(self.texture.size)
         self.texture.flip_vertical()
-   
+
+
 class CameraWidget(BoxLayout):
-    pass
-
-class Image_Gallery(GridLayout):
-    def __init__(self, **kwargs):
-        super(Image_Gallery, self).__init__(**kwargs)
-        images = glob.glob('./*.png') 
-        self.cols = 3
-        for img in images:
-            print(1, img)
-            thumb = MyImage(source=img)
-            self.add_widget(thumb)
-           
-
-class MyImage(Image):
-    def on_touch_down(self, touch):
-        if self.collide_point(*touch.pos):
-            print(self.source)
+    def TakePicture(self, *args):
+        self.export_to_png = export_to_png
+        self.export_to_png(self.ids.camera, filename="test2.png")
+        print("Captured")
 
 
 class Demo(ScreenManager):
-    def capture(self):
-        camera = self.ids['camera1']
+
+    # after improve
+    def capture(self, *args):
+        # select instance for id from demo.kv
+        camera = self.ids.camera1
         timestr = time.strftime("%Y%m%d_%H%M%S")
-        camera.export_to_png("IMG_{}.png".format(timestr))
+        file_name = "photo_gallery/IMG_{}".format(timestr)
+        img = camera.export_as_image("{}.png".format(file_name))
+        now = datetime.datetime.now()
+        print(now)
+        # kivi.core.image.Image to kivy.graphics.texture.Texture
+        texture_of_image = img.texture
+        texture_height, texture_width = texture_of_image.height, texture_of_image.width
+
+        # kivy.graphics.texture.Texture to numpy.ndarray
+        newvalue = np.frombuffer(texture_of_image.pixels, np.uint8)
+        newvalue = newvalue.reshape(texture_height, texture_width, 4)
+
+        # Image processing
+        imageProcess = ImageProcess(file_name, newvalue)
+        blurred_image = imageProcess.adapt_blur()
+        print(datetime.datetime.now() - now)
         print("Captured")
 
-    def refresh(self):
-        gallery = self.ids['gallery']
-        gallery.__init__(gallery)
+    """
+    # before improve
+    def capture(self, *args):
+        camera = self.ids.camera1
+        timestr = time.strftime("%Y%m%d_%H%M%S")
+        file_name = "photo_gallery/IMG_{}.png".format(timestr)
+        camera.export_to_png(file_name)
+        imageProcess = ImageProcess(file_name)
+        blurred_image = imageProcess.adapt_blur()
+        print("Captured")
+    """
 
 
 class DemoApp(App):
+    def build(self):
+        return Demo()
 
-	def build(self):
-		return Demo()
+
+# PIL.Image object to numpy.ndarray object, by Taeho
+def numpy_to_image(numpy_img):
+    img = Image.fromarray(numpy_img, "RGB")
+    return img
+
+
+def pil_image_to_base64(pil_img):
+    data = BytesIO()
+    pil_img.save(data, "png")  # pick your format
+    # pil_img.save("uploads/images/test.png", "png")
+    pil_img.seek(0)
+    data64 = base64.b64encode(data.getvalue())
+    return data64.decode("utf-8")
+
 
 DemoApp().run()
